@@ -117,7 +117,7 @@ function hit(o,p,r){
  const out=p.x>X0-r&&p.x<X1+r&&p.y>Y0-r&&p.y<Y1+r;
  if(o.t=='img'||o.t=='text'||o.fill)return out;
  return out&&!(p.x>X0+r&&p.x<X1-r&&p.y>Y0+r&&p.y<Y1-r)}
-const top=(p,r)=>{for(let i=objs.length-1;i>=0;i--)if(!objs[i].hide&&objs[i].cv!==null&&hit(objs[i],p,r))return objs[i]};
+const topHit=(p,r)=>{for(let i=objs.length-1;i>=0;i--)if(!objs[i].hide&&objs[i].cv!==null&&hit(objs[i],p,r))return objs[i]};
 function move(o,dx,dy){if(o.pts)o.pts.forEach(q=>{q[0]+=dx;q[1]+=dy});if(o.a){o.a[0]+=dx;o.a[1]+=dy;o.b[0]+=dx;o.b[1]+=dy}if(o.x!=null){o.x+=dx;o.y+=dy}}
 
 function render(){
@@ -134,7 +134,7 @@ function snap(a,b,force){const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy),s=M
 function erase(p){const r=Math.max(size,10)/view.s,n=objs.filter(o=>!hit(o,p,r));if(n.length!=objs.length){objs=n;if(sel&&!objs.includes(sel))sel=null}}
 function pixelOf(o,p){return[Math.floor((p.x-o.x)/o.w*o.cv.width),Math.floor((p.y-o.y)/o.h*o.cv.height)]}
 function bucket(p,r){
- const o=top(p,r);push();
+ const o=topHit(p,r);push();
  if(!o){bg=color;return}
  if(o.t=='img'){const[x,y]=pixelOf(o,p),c=cp(o.cv),g=c.getContext('2d'),w=c.width,h=c.height,id=g.getImageData(0,0,w,h),d=id.data,i0=(y*w+x)*4,t=[d[i0],d[i0+1],d[i0+2],d[i0+3]],[R,G,B]=rgb(color),lim=tol*4.4;
   const df=i=>Math.hypot(d[i]-t[0],d[i+1]-t[1],d[i+2]-t[2],d[i+3]-t[3]),seen=new Uint8Array(w*h),stk=[y*w+x];seen[stk[0]]=1;
@@ -191,8 +191,8 @@ cv.onpointerdown=e=>{
  else if(tool=='pen')cur={t:'pen',pts:[[p.x,p.y]],c:color,w:size};
  else if(['ruler','rect','ell','arrow'].includes(tool))cur={t:tool=='ruler'?'line':tool,a:[p.x,p.y],b:[p.x,p.y],c:color,w:size,ruler:tool=='ruler'};
  else if(tool=='eraser'){push();drag={k:'er'};erase(p)}
- else if(tool=='select'){const o=top(p,r);sel=o||null;if(o)drag={k:'mv',x:p.x,y:p.y,pushed:0};else pan(e)}
- else if(tool=='text'){const o=top(p,r);editText(o&&o.t=='text'?o:null,p)}
+ else if(tool=='select'){const o=topHit(p,r);sel=o||null;if(o)drag={k:'mv',x:p.x,y:p.y,pushed:0};else pan(e)}
+ else if(tool=='text'){const o=topHit(p,r);editText(o&&o.t=='text'?o:null,p)}
  else if(tool=='zoom')zoomAt(e.altKey||e.shiftKey?1/1.5:1.5,e.clientX,e.clientY);
  else if(tool=='bucket')bucket(p,r);
  else if(tool=='chroma')chroma(p);
